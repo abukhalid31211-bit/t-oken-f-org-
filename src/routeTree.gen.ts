@@ -9,51 +9,236 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppRouteImport } from './routes/_app'
+import { Route as AppIndexRouteImport } from './routes/_app.index'
+import { Route as AppWalletsRouteImport } from './routes/_app.wallets'
+import { Route as AppSettingsRouteImport } from './routes/_app.settings'
+import { Route as AppReportsRouteImport } from './routes/_app.reports'
+import { Route as AppFactoryRouteImport } from './routes/_app.factory'
+import { Route as AppDistributionRouteImport } from './routes/_app.distribution'
+import { Route as AppAuditRouteImport } from './routes/_app.audit'
+import { Route as AppAssetsRouteImport } from './routes/_app.assets'
 
-const IndexRoute = IndexRouteImport.update({
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
+} as any)
+const AppWalletsRoute = AppWalletsRouteImport.update({
+  id: '/wallets',
+  path: '/wallets',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppReportsRoute = AppReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFactoryRoute = AppFactoryRouteImport.update({
+  id: '/factory',
+  path: '/factory',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDistributionRoute = AppDistributionRouteImport.update({
+  id: '/distribution',
+  path: '/distribution',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAuditRoute = AppAuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAssetsRoute = AppAssetsRouteImport.update({
+  id: '/assets',
+  path: '/assets',
+  getParentRoute: () => AppRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof AppIndexRoute
+  '/assets': typeof AppAssetsRoute
+  '/audit': typeof AppAuditRoute
+  '/distribution': typeof AppDistributionRoute
+  '/factory': typeof AppFactoryRoute
+  '/reports': typeof AppReportsRoute
+  '/settings': typeof AppSettingsRoute
+  '/wallets': typeof AppWalletsRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/assets': typeof AppAssetsRoute
+  '/audit': typeof AppAuditRoute
+  '/distribution': typeof AppDistributionRoute
+  '/factory': typeof AppFactoryRoute
+  '/reports': typeof AppReportsRoute
+  '/settings': typeof AppSettingsRoute
+  '/wallets': typeof AppWalletsRoute
+  '/': typeof AppIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/_app': typeof AppRouteWithChildren
+  '/_app/assets': typeof AppAssetsRoute
+  '/_app/audit': typeof AppAuditRoute
+  '/_app/distribution': typeof AppDistributionRoute
+  '/_app/factory': typeof AppFactoryRoute
+  '/_app/reports': typeof AppReportsRoute
+  '/_app/settings': typeof AppSettingsRoute
+  '/_app/wallets': typeof AppWalletsRoute
+  '/_app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/assets'
+    | '/audit'
+    | '/distribution'
+    | '/factory'
+    | '/reports'
+    | '/settings'
+    | '/wallets'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/assets'
+    | '/audit'
+    | '/distribution'
+    | '/factory'
+    | '/reports'
+    | '/settings'
+    | '/wallets'
+    | '/'
+  id:
+    | '__root__'
+    | '/_app'
+    | '/_app/assets'
+    | '/_app/audit'
+    | '/_app/distribution'
+    | '/_app/factory'
+    | '/_app/reports'
+    | '/_app/settings'
+    | '/_app/wallets'
+    | '/_app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app/': {
+      id: '/_app/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/wallets': {
+      id: '/_app/wallets'
+      path: '/wallets'
+      fullPath: '/wallets'
+      preLoaderRoute: typeof AppWalletsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/settings': {
+      id: '/_app/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/reports': {
+      id: '/_app/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof AppReportsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/factory': {
+      id: '/_app/factory'
+      path: '/factory'
+      fullPath: '/factory'
+      preLoaderRoute: typeof AppFactoryRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/distribution': {
+      id: '/_app/distribution'
+      path: '/distribution'
+      fullPath: '/distribution'
+      preLoaderRoute: typeof AppDistributionRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/audit': {
+      id: '/_app/audit'
+      path: '/audit'
+      fullPath: '/audit'
+      preLoaderRoute: typeof AppAuditRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/assets': {
+      id: '/_app/assets'
+      path: '/assets'
+      fullPath: '/assets'
+      preLoaderRoute: typeof AppAssetsRouteImport
+      parentRoute: typeof AppRoute
     }
   }
 }
 
+interface AppRouteChildren {
+  AppAssetsRoute: typeof AppAssetsRoute
+  AppAuditRoute: typeof AppAuditRoute
+  AppDistributionRoute: typeof AppDistributionRoute
+  AppFactoryRoute: typeof AppFactoryRoute
+  AppReportsRoute: typeof AppReportsRoute
+  AppSettingsRoute: typeof AppSettingsRoute
+  AppWalletsRoute: typeof AppWalletsRoute
+  AppIndexRoute: typeof AppIndexRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppAssetsRoute: AppAssetsRoute,
+  AppAuditRoute: AppAuditRoute,
+  AppDistributionRoute: AppDistributionRoute,
+  AppFactoryRoute: AppFactoryRoute,
+  AppReportsRoute: AppReportsRoute,
+  AppSettingsRoute: AppSettingsRoute,
+  AppWalletsRoute: AppWalletsRoute,
+  AppIndexRoute: AppIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
