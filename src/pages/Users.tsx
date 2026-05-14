@@ -1,14 +1,7 @@
 import { useState } from "react";
 import { PageHeader, StatusPill } from "@/components/Primitives";
-import {
-  Plus, Trash2, MoreHorizontal, Loader2, UserCheck, UserX, Shield, Eye, Mail,
-} from "lucide-react";
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
-} from "@/components/ui/dialog";
-import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Plus, Trash2, MoreHorizontal, Loader2, UserCheck, UserX, Shield, Eye, Mail } from "lucide-react";
+import { Modal } from "@/components/Modal";
 import { toast } from "sonner";
 
 type UserRole = "super_admin" | "finance_manager" | "operations_manager" | "auditor" | "viewer";
@@ -31,7 +24,6 @@ const roleLabel: Record<UserRole, string> = {
   auditor: "مدقق",
   viewer: "مشاهد",
 };
-
 const roleColor: Record<UserRole, string> = {
   super_admin: "bg-accent/15 text-accent",
   finance_manager: "bg-success/15 text-success",
@@ -39,7 +31,6 @@ const roleColor: Record<UserRole, string> = {
   auditor: "bg-muted text-muted-foreground",
   viewer: "bg-muted text-muted-foreground",
 };
-
 const rolePermissions: Record<UserRole, string[]> = {
   super_admin: ["جميع الصلاحيات بلا قيود"],
   finance_manager: ["التحويلات", "التقارير المالية", "إدارة المحافظ"],
@@ -62,6 +53,7 @@ export function Users() {
   const [invite, setInvite] = useState({ name: "", email: "", role: "viewer" as UserRole });
   const [sending, setSending] = useState(false);
   const [selected, setSelected] = useState<User | null>(null);
+  const [openMenu, setOpenMenu] = useState<number | null>(null);
 
   const sendInvite = (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,8 +63,7 @@ export function Users() {
       const newUser: User = {
         id: Math.max(...users.map((u) => u.id)) + 1,
         name: invite.name, email: invite.email, role: invite.role,
-        status: "active", lastSeen: "لم يسجل دخول بعد",
-        joinedAt: new Date().toISOString().split("T")[0],
+        status: "active", lastSeen: "لم يسجل دخول بعد", joinedAt: new Date().toISOString().split("T")[0],
       };
       setUsers((u) => [...u, newUser]);
       toast.success(`تم إرسال دعوة إلى ${invite.email}`);
@@ -84,20 +75,23 @@ export function Users() {
 
   const toggleStatus = (u: User) => {
     setUsers((all) => all.map((x) => x.id === u.id ? { ...x, status: x.status === "active" ? "disabled" : "active" } : x));
+    if (selected?.id === u.id) setSelected((s) => s ? { ...s, status: s.status === "active" ? "disabled" : "active" } : null);
     toast.success(u.status === "active" ? `تم تعطيل ${u.name}` : `تم تفعيل ${u.name}`);
   };
 
   const changeRole = (u: User, role: UserRole) => {
     setUsers((all) => all.map((x) => x.id === u.id ? { ...x, role } : x));
+    if (selected?.id === u.id) setSelected((s) => s ? { ...s, role } : null);
     toast.success(`تم تغيير دور ${u.name} إلى ${roleLabel[role]}`);
+    setOpenMenu(null);
   };
 
   const remove = (u: User) => {
     setUsers((all) => all.filter((x) => x.id !== u.id));
+    if (selected?.id === u.id) setSelected(null);
     toast.success(`تم إزالة ${u.name}`);
+    setOpenMenu(null);
   };
-
-  const activeCount = users.filter((u) => u.status === "active").length;
 
   return (
     <>
@@ -105,22 +99,14 @@ export function Users() {
         title="إدارة المستخدمين"
         subtitle="تحكم في أعضاء الفريق وصلاحياتهم RBAC."
         action={
-          <button
-            onClick={() => setOpen(true)}
-            className="px-5 py-2.5 bg-foreground text-background font-bold text-sm rounded-sm inline-flex items-center gap-2 hover:bg-foreground/90 transition-colors"
-          >
-            <Plus className="size-4" strokeWidth={2.5} />
-            دعوة عضو
+          <button onClick={() => setOpen(true)} className="px-5 py-2.5 bg-foreground text-background font-bold text-sm rounded-sm inline-flex items-center gap-2 hover:bg-foreground/90 transition-colors">
+            <Plus className="size-4" strokeWidth={2.5} /> دعوة عضو
           </button>
         }
       />
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10 animate-enter">
-        {[
-          { l: "إجمالي المستخدمين", v: String(users.length) },
-          { l: "مستخدمون نشطون", v: String(activeCount) },
-          { l: "الأدوار المتاحة", v: "5" },
-        ].map((s) => (
+        {[{ l: "إجمالي المستخدمين", v: String(users.length) }, { l: "مستخدمون نشطون", v: String(users.filter((u) => u.status === "active").length) }, { l: "الأدوار المتاحة", v: "5" }].map((s) => (
           <div key={s.l} className="border border-border p-6 rounded-sm">
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3">{s.l}</p>
             <p className="text-3xl font-bold ltr font-mono">{s.v}</p>
@@ -143,11 +129,7 @@ export function Users() {
               </thead>
               <tbody className="divide-y divide-border/60">
                 {users.map((u) => (
-                  <tr
-                    key={u.id}
-                    onClick={() => setSelected(u)}
-                    className={`cursor-pointer hover:bg-foreground/[0.02] transition-colors ${selected?.id === u.id ? "bg-foreground/[0.03]" : ""}`}
-                  >
+                  <tr key={u.id} onClick={() => setSelected(u)} className={`cursor-pointer hover:bg-foreground/[0.02] transition-colors ${selected?.id === u.id ? "bg-foreground/[0.03]" : ""}`}>
                     <td className="p-4">
                       <div className="flex items-center gap-3">
                         <div className="size-9 bg-foreground/5 rounded-full grid place-items-center text-xs font-bold shrink-0">
@@ -160,49 +142,52 @@ export function Users() {
                       </div>
                     </td>
                     <td className="p-4">
-                      <span className={`inline-block px-2 py-1 text-xs rounded-sm font-semibold ${roleColor[u.role]}`}>
-                        {roleLabel[u.role]}
-                      </span>
+                      <span className={`inline-block px-2 py-1 text-xs rounded-sm font-semibold ${roleColor[u.role]}`}>{roleLabel[u.role]}</span>
                     </td>
                     <td className="p-4">
-                      <StatusPill variant={u.status === "active" ? "active" : "failed"}>
-                        {u.status === "active" ? "نشط" : "معطل"}
-                      </StatusPill>
+                      <StatusPill variant={u.status === "active" ? "active" : "failed"}>{u.status === "active" ? "نشط" : "معطل"}</StatusPill>
                     </td>
                     <td className="p-4 text-xs text-muted-foreground">{u.lastSeen}</td>
                     <td className="p-4" onClick={(e) => e.stopPropagation()}>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <button className="size-8 grid place-items-center text-muted-foreground hover:text-foreground transition-colors">
-                            <MoreHorizontal className="size-4" />
-                          </button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" dir="rtl">
-                          <DropdownMenuItem onClick={() => setSelected(u)}>
-                            <Eye className="size-4 ml-2" /> عرض التفاصيل
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          {(Object.keys(roleLabel) as UserRole[]).map((r) => (
-                            <DropdownMenuItem key={r} onClick={() => changeRole(u, r)} className={u.role === r ? "font-bold" : ""}>
-                              <Shield className="size-4 ml-2" /> {roleLabel[r]}
-                              {u.role === r && " ✓"}
-                            </DropdownMenuItem>
-                          ))}
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => toggleStatus(u)}>
-                            {u.status === "active"
-                              ? <><UserX className="size-4 ml-2" /> تعطيل الحساب</>
-                              : <><UserCheck className="size-4 ml-2" /> تفعيل الحساب</>}
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            className="text-destructive focus:text-destructive"
-                            onClick={() => remove(u)}
-                          >
-                            <Trash2 className="size-4 ml-2" /> إزالة المستخدم
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      {/* Pure CSS dropdown — no Radix */}
+                      <div style={{ position: "relative" }}>
+                        <button
+                          type="button"
+                          onClick={() => setOpenMenu(openMenu === u.id ? null : u.id)}
+                          className="size-8 grid place-items-center text-muted-foreground hover:text-foreground"
+                        >
+                          <MoreHorizontal className="size-4" />
+                        </button>
+                        {openMenu === u.id && (
+                          <>
+                            <div style={{ position: "fixed", inset: 0, zIndex: 30 }} onClick={() => setOpenMenu(null)} />
+                            <div style={{ position: "absolute", left: 0, top: "calc(100% + 4px)", zIndex: 40, width: 200 }}
+                              className="bg-popover border border-border rounded-sm shadow-xl py-1">
+                              <button type="button" onClick={() => { setSelected(u); setOpenMenu(null); }}
+                                className="w-full text-right px-4 py-2.5 text-sm hover:bg-muted flex items-center gap-2">
+                                <Eye className="size-4" /> عرض التفاصيل
+                              </button>
+                              <div className="my-1 border-t border-border" />
+                              {(Object.keys(roleLabel) as UserRole[]).map((r) => (
+                                <button key={r} type="button" onClick={() => changeRole(u, r)}
+                                  className={`w-full text-right px-4 py-2 text-sm hover:bg-muted flex items-center gap-2 ${u.role === r ? "font-bold text-accent" : ""}`}>
+                                  <Shield className="size-4 opacity-60" /> {roleLabel[r]}{u.role === r ? " ✓" : ""}
+                                </button>
+                              ))}
+                              <div className="my-1 border-t border-border" />
+                              <button type="button" onClick={() => { toggleStatus(u); setOpenMenu(null); }}
+                                className="w-full text-right px-4 py-2.5 text-sm hover:bg-muted flex items-center gap-2">
+                                {u.status === "active" ? <><UserX className="size-4" /> تعطيل</> : <><UserCheck className="size-4" /> تفعيل</>}
+                              </button>
+                              <div className="my-1 border-t border-border" />
+                              <button type="button" onClick={() => remove(u)}
+                                className="w-full text-right px-4 py-2.5 text-sm text-destructive hover:bg-muted flex items-center gap-2">
+                                <Trash2 className="size-4" /> إزالة
+                              </button>
+                            </div>
+                          </>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -245,19 +230,14 @@ export function Users() {
                 <ul className="space-y-2">
                   {rolePermissions[selected.role].map((p) => (
                     <li key={p} className="text-xs flex items-center gap-2">
-                      <span className="size-1.5 rounded-full bg-success shrink-0" />
-                      {p}
+                      <span className="size-1.5 rounded-full bg-success shrink-0" /> {p}
                     </li>
                   ))}
                 </ul>
               </div>
               <button
-                onClick={() => { toggleStatus(selected); setSelected((s) => s ? { ...s, status: s.status === "active" ? "disabled" : "active" } : null); }}
-                className={`w-full py-2.5 text-sm font-bold rounded-sm transition-colors ${
-                  selected.status === "active"
-                    ? "border border-destructive text-destructive hover:bg-destructive/10"
-                    : "bg-success/15 text-success hover:bg-success/25"
-                }`}
+                onClick={() => toggleStatus(selected)}
+                className={`w-full py-2.5 text-sm font-bold rounded-sm transition-colors ${selected.status === "active" ? "border border-destructive text-destructive hover:bg-destructive/10" : "bg-success/15 text-success hover:bg-success/25"}`}
               >
                 {selected.status === "active" ? "تعطيل الحساب" : "تفعيل الحساب"}
               </button>
@@ -266,19 +246,16 @@ export function Users() {
             <div className="border border-dashed border-border rounded-sm p-8 text-center">
               <Shield className="size-8 mx-auto mb-3 text-muted-foreground" strokeWidth={1.5} />
               <p className="text-sm font-semibold mb-1">تفاصيل المستخدم</p>
-              <p className="text-xs text-muted-foreground">انقر على مستخدم لعرض تفاصيله وصلاحياته</p>
+              <p className="text-xs text-muted-foreground">انقر على مستخدم لعرض تفاصيله</p>
             </div>
           )}
-
           <div className="border border-border rounded-sm p-5">
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-4">الأدوار المتاحة</p>
             <div className="space-y-2">
               {(Object.entries(roleLabel) as [UserRole, string][]).map(([key, label]) => (
                 <div key={key} className="flex items-center justify-between text-sm">
                   <span className={`px-2 py-0.5 rounded-sm text-xs font-semibold ${roleColor[key]}`}>{label}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {users.filter((u) => u.role === key).length} مستخدمين
-                  </span>
+                  <span className="text-xs text-muted-foreground">{users.filter((u) => u.role === key).length} مستخدمين</span>
                 </div>
               ))}
             </div>
@@ -286,69 +263,42 @@ export function Users() {
         </aside>
       </div>
 
-      <Dialog open={open} onOpenChange={(o) => { if (!sending) setOpen(o); }}>
-        <DialogContent dir="rtl">
-          <DialogHeader>
-            <DialogTitle className="text-2xl tracking-tight flex items-center gap-3">
-              <Mail className="size-5" /> دعوة عضو جديد
-            </DialogTitle>
-            <DialogDescription>سيصل رابط دعوة آمن إلى البريد المُدخل.</DialogDescription>
-          </DialogHeader>
-          <form onSubmit={sendInvite} className="space-y-5 mt-2">
-            <label className="block">
-              <span className="text-sm font-semibold mb-2 block">الاسم الكامل</span>
-              <input
-                required value={invite.name} onChange={(e) => setInvite({ ...invite, name: e.target.value })}
-                placeholder="أحمد محمد العمري"
-                className="w-full bg-transparent border border-border rounded-sm px-4 py-3 outline-none focus:border-foreground"
-              />
-            </label>
-            <label className="block">
-              <span className="text-sm font-semibold mb-2 block">البريد الإلكتروني المؤسسي</span>
-              <input
-                required type="email" value={invite.email} onChange={(e) => setInvite({ ...invite, email: e.target.value })}
-                placeholder="name@company.com" dir="ltr"
-                className="w-full bg-transparent border border-border rounded-sm px-4 py-3 outline-none focus:border-foreground font-mono text-sm"
-              />
-            </label>
-            <label className="block">
-              <span className="text-sm font-semibold mb-2 block">الدور</span>
-              <select
-                value={invite.role} onChange={(e) => setInvite({ ...invite, role: e.target.value as UserRole })}
-                className="w-full bg-transparent border border-border rounded-sm px-4 py-3 outline-none focus:border-foreground"
-              >
-                {(Object.entries(roleLabel) as [UserRole, string][]).map(([k, v]) => (
-                  <option key={k} value={k}>{v}</option>
+      <Modal open={open} onClose={() => { if (!sending) setOpen(false); }}
+        title={<span className="flex items-center gap-3"><Mail className="size-5" /> دعوة عضو جديد</span>}
+        description="سيصل رابط دعوة آمن إلى البريد المُدخل.">
+        <form onSubmit={sendInvite} className="space-y-5">
+          <label className="block">
+            <span className="text-sm font-semibold mb-2 block">الاسم الكامل</span>
+            <input required value={invite.name} onChange={(e) => setInvite({ ...invite, name: e.target.value })} placeholder="أحمد محمد العمري"
+              className="w-full bg-transparent border border-border rounded-sm px-4 py-3 outline-none focus:border-foreground" />
+          </label>
+          <label className="block">
+            <span className="text-sm font-semibold mb-2 block">البريد الإلكتروني المؤسسي</span>
+            <input required type="email" value={invite.email} onChange={(e) => setInvite({ ...invite, email: e.target.value })} placeholder="name@company.com" dir="ltr"
+              className="w-full bg-transparent border border-border rounded-sm px-4 py-3 outline-none focus:border-foreground font-mono text-sm" />
+          </label>
+          <label className="block">
+            <span className="text-sm font-semibold mb-2 block">الدور</span>
+            <select value={invite.role} onChange={(e) => setInvite({ ...invite, role: e.target.value as UserRole })}
+              className="w-full bg-transparent border border-border rounded-sm px-4 py-3 outline-none focus:border-foreground">
+              {(Object.entries(roleLabel) as [UserRole, string][]).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+            </select>
+            <div className="mt-2 p-3 bg-muted/50 rounded-sm">
+              <ul className="space-y-1">
+                {rolePermissions[invite.role].map((p) => (
+                  <li key={p} className="text-xs flex items-center gap-2"><span className="size-1.5 rounded-full bg-success shrink-0" />{p}</li>
                 ))}
-              </select>
-              {invite.role && (
-                <div className="mt-2 p-3 bg-muted/50 rounded-sm">
-                  <p className="text-xs font-semibold mb-1 text-muted-foreground">الصلاحيات:</p>
-                  <ul className="space-y-1">
-                    {rolePermissions[invite.role].map((p) => (
-                      <li key={p} className="text-xs flex items-center gap-2">
-                        <span className="size-1.5 rounded-full bg-success shrink-0" />
-                        {p}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </label>
-            <div className="flex gap-3 pt-2">
-              <button type="button" onClick={() => setOpen(false)} className="px-5 py-3 border border-border rounded-sm font-semibold hover:bg-muted">
-                إلغاء
-              </button>
-              <button
-                type="submit" disabled={sending}
-                className="flex-1 py-3 bg-foreground text-background font-bold rounded-sm hover:bg-foreground/90 inline-flex items-center justify-center gap-2 disabled:opacity-60"
-              >
-                {sending ? <><Loader2 className="size-4 animate-spin" /> جارٍ الإرسال...</> : <><Mail className="size-4" /> إرسال الدعوة</>}
-              </button>
+              </ul>
             </div>
-          </form>
-        </DialogContent>
-      </Dialog>
+          </label>
+          <div className="flex gap-3 pt-2">
+            <button type="button" onClick={() => setOpen(false)} className="px-5 py-3 border border-border rounded-sm font-semibold hover:bg-muted">إلغاء</button>
+            <button type="submit" disabled={sending} className="flex-1 py-3 bg-foreground text-background font-bold rounded-sm hover:bg-foreground/90 inline-flex items-center justify-center gap-2 disabled:opacity-60">
+              {sending ? <><Loader2 className="size-4 animate-spin" /> جارٍ الإرسال...</> : <><Mail className="size-4" /> إرسال الدعوة</>}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </>
   );
 }
