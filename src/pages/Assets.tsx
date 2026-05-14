@@ -1,5 +1,6 @@
 import { PageHeader, StatusPill } from "@/components/Primitives";
 import { Download, Filter } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 
 const assets = [
   { name: "ريال كوين", symbol: "RC", supply: "1,000,000", network: "Ethereum", addr: "0x71C4...3f2a", deployed: "2026-04-12", status: "active" as const },
@@ -17,13 +18,11 @@ export function Assets() {
         subtitle="جميع التوكنات المنشورة عبر شبكاتك المختلفة."
         action={
           <div className="flex gap-2">
-            <button className="px-4 py-2.5 border border-border rounded-sm text-sm font-semibold inline-flex items-center gap-2 hover:bg-muted transition-colors">
-              <Filter className="size-4" />
-              تصفية
+            <button className="px-4 py-2.5 border border-border rounded-sm text-sm font-semibold inline-flex items-center gap-2 hover:bg-muted">
+              <Filter className="size-4" /> تصفية
             </button>
-            <button className="px-4 py-2.5 border border-border rounded-sm text-sm font-semibold inline-flex items-center gap-2 hover:bg-muted transition-colors">
-              <Download className="size-4" />
-              تصدير
+            <button className="px-4 py-2.5 border border-border rounded-sm text-sm font-semibold inline-flex items-center gap-2 hover:bg-muted">
+              <Download className="size-4" /> تصدير
             </button>
           </div>
         }
@@ -44,8 +43,12 @@ export function Assets() {
           </thead>
           <tbody className="divide-y divide-border/60">
             {assets.map((a) => (
-              <tr key={a.symbol} className="hover:bg-foreground/[0.02] transition-colors">
-                <td className="p-4 font-bold">{a.name}</td>
+              <tr key={a.symbol} className="hover:bg-foreground/[0.02] cursor-pointer transition-colors">
+                <td className="p-4 font-bold">
+                  <Link to="/assets/$id" params={{ id: a.symbol }} className="hover:underline decoration-accent decoration-2 underline-offset-4">
+                    {a.name}
+                  </Link>
+                </td>
                 <td className="p-4 font-mono text-sm text-muted-foreground ltr">{a.symbol}</td>
                 <td className="p-4 font-mono text-sm ltr">{a.supply}</td>
                 <td className="p-4 font-mono text-xs ltr text-muted-foreground">{a.network}</td>

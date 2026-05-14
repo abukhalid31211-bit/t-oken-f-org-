@@ -3,4 +3,5 @@ import { Assets } from "@/pages/Assets";
 
 export const Route = createFileRoute("/_app/assets")({
   component: Assets,
+  head: () => ({ meta: [{ title: "نواة — سجل الأصول" }] }),
 });

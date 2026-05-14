@@ -3,4 +3,5 @@ import { SettingsPage } from "@/pages/Settings";
 
 export const Route = createFileRoute("/_app/settings")({
   component: SettingsPage,
+  head: () => ({ meta: [{ title: "نواة — الإعدادات" }] }),
 });

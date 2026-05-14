@@ -9,8 +9,12 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as AppIndexRouteImport } from './routes/_app.index'
+import { Route as AuthRegisterRouteImport } from './routes/auth.register'
+import { Route as AuthLoginRouteImport } from './routes/auth.login'
+import { Route as AuthForgotRouteImport } from './routes/auth.forgot'
 import { Route as AppWalletsRouteImport } from './routes/_app.wallets'
 import { Route as AppSettingsRouteImport } from './routes/_app.settings'
 import { Route as AppReportsRouteImport } from './routes/_app.reports'
@@ -18,7 +22,13 @@ import { Route as AppFactoryRouteImport } from './routes/_app.factory'
 import { Route as AppDistributionRouteImport } from './routes/_app.distribution'
 import { Route as AppAuditRouteImport } from './routes/_app.audit'
 import { Route as AppAssetsRouteImport } from './routes/_app.assets'
+import { Route as AppAssetsIdRouteImport } from './routes/_app.assets.$id'
 
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppRoute = AppRouteImport.update({
   id: '/_app',
   getParentRoute: () => rootRouteImport,
@@ -27,6 +37,21 @@ const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AppRoute,
+} as any)
+const AuthRegisterRoute = AuthRegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthLoginRoute = AuthLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthForgotRoute = AuthForgotRouteImport.update({
+  id: '/forgot',
+  path: '/forgot',
+  getParentRoute: () => AuthRoute,
 } as any)
 const AppWalletsRoute = AppWalletsRouteImport.update({
   id: '/wallets',
@@ -63,43 +88,64 @@ const AppAssetsRoute = AppAssetsRouteImport.update({
   path: '/assets',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAssetsIdRoute = AppAssetsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AppAssetsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
-  '/assets': typeof AppAssetsRoute
+  '/auth': typeof AuthRouteWithChildren
+  '/assets': typeof AppAssetsRouteWithChildren
   '/audit': typeof AppAuditRoute
   '/distribution': typeof AppDistributionRoute
   '/factory': typeof AppFactoryRoute
   '/reports': typeof AppReportsRoute
   '/settings': typeof AppSettingsRoute
   '/wallets': typeof AppWalletsRoute
+  '/auth/forgot': typeof AuthForgotRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/register': typeof AuthRegisterRoute
+  '/assets/$id': typeof AppAssetsIdRoute
 }
 export interface FileRoutesByTo {
-  '/assets': typeof AppAssetsRoute
+  '/auth': typeof AuthRouteWithChildren
+  '/assets': typeof AppAssetsRouteWithChildren
   '/audit': typeof AppAuditRoute
   '/distribution': typeof AppDistributionRoute
   '/factory': typeof AppFactoryRoute
   '/reports': typeof AppReportsRoute
   '/settings': typeof AppSettingsRoute
   '/wallets': typeof AppWalletsRoute
+  '/auth/forgot': typeof AuthForgotRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/register': typeof AuthRegisterRoute
   '/': typeof AppIndexRoute
+  '/assets/$id': typeof AppAssetsIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteWithChildren
-  '/_app/assets': typeof AppAssetsRoute
+  '/auth': typeof AuthRouteWithChildren
+  '/_app/assets': typeof AppAssetsRouteWithChildren
   '/_app/audit': typeof AppAuditRoute
   '/_app/distribution': typeof AppDistributionRoute
   '/_app/factory': typeof AppFactoryRoute
   '/_app/reports': typeof AppReportsRoute
   '/_app/settings': typeof AppSettingsRoute
   '/_app/wallets': typeof AppWalletsRoute
+  '/auth/forgot': typeof AuthForgotRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/register': typeof AuthRegisterRoute
   '/_app/': typeof AppIndexRoute
+  '/_app/assets/$id': typeof AppAssetsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/auth'
     | '/assets'
     | '/audit'
     | '/distribution'
@@ -107,8 +153,13 @@ export interface FileRouteTypes {
     | '/reports'
     | '/settings'
     | '/wallets'
+    | '/auth/forgot'
+    | '/auth/login'
+    | '/auth/register'
+    | '/assets/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/auth'
     | '/assets'
     | '/audit'
     | '/distribution'
@@ -116,10 +167,15 @@ export interface FileRouteTypes {
     | '/reports'
     | '/settings'
     | '/wallets'
+    | '/auth/forgot'
+    | '/auth/login'
+    | '/auth/register'
     | '/'
+    | '/assets/$id'
   id:
     | '__root__'
     | '/_app'
+    | '/auth'
     | '/_app/assets'
     | '/_app/audit'
     | '/_app/distribution'
@@ -127,15 +183,27 @@ export interface FileRouteTypes {
     | '/_app/reports'
     | '/_app/settings'
     | '/_app/wallets'
+    | '/auth/forgot'
+    | '/auth/login'
+    | '/auth/register'
     | '/_app/'
+    | '/_app/assets/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
+  AuthRoute: typeof AuthRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_app': {
       id: '/_app'
       path: ''
@@ -149,6 +217,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/auth/register': {
+      id: '/auth/register'
+      path: '/register'
+      fullPath: '/auth/register'
+      preLoaderRoute: typeof AuthRegisterRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/auth/login': {
+      id: '/auth/login'
+      path: '/login'
+      fullPath: '/auth/login'
+      preLoaderRoute: typeof AuthLoginRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/auth/forgot': {
+      id: '/auth/forgot'
+      path: '/forgot'
+      fullPath: '/auth/forgot'
+      preLoaderRoute: typeof AuthForgotRouteImport
+      parentRoute: typeof AuthRoute
     }
     '/_app/wallets': {
       id: '/_app/wallets'
@@ -199,11 +288,30 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAssetsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/assets/$id': {
+      id: '/_app/assets/$id'
+      path: '/$id'
+      fullPath: '/assets/$id'
+      preLoaderRoute: typeof AppAssetsIdRouteImport
+      parentRoute: typeof AppAssetsRoute
+    }
   }
 }
 
+interface AppAssetsRouteChildren {
+  AppAssetsIdRoute: typeof AppAssetsIdRoute
+}
+
+const AppAssetsRouteChildren: AppAssetsRouteChildren = {
+  AppAssetsIdRoute: AppAssetsIdRoute,
+}
+
+const AppAssetsRouteWithChildren = AppAssetsRoute._addFileChildren(
+  AppAssetsRouteChildren,
+)
+
 interface AppRouteChildren {
-  AppAssetsRoute: typeof AppAssetsRoute
+  AppAssetsRoute: typeof AppAssetsRouteWithChildren
   AppAuditRoute: typeof AppAuditRoute
   AppDistributionRoute: typeof AppDistributionRoute
   AppFactoryRoute: typeof AppFactoryRoute
@@ -214,7 +322,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
-  AppAssetsRoute: AppAssetsRoute,
+  AppAssetsRoute: AppAssetsRouteWithChildren,
   AppAuditRoute: AppAuditRoute,
   AppDistributionRoute: AppDistributionRoute,
   AppFactoryRoute: AppFactoryRoute,
@@ -226,8 +334,23 @@ const AppRouteChildren: AppRouteChildren = {
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
+interface AuthRouteChildren {
+  AuthForgotRoute: typeof AuthForgotRoute
+  AuthLoginRoute: typeof AuthLoginRoute
+  AuthRegisterRoute: typeof AuthRegisterRoute
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthForgotRoute: AuthForgotRoute,
+  AuthLoginRoute: AuthLoginRoute,
+  AuthRegisterRoute: AuthRegisterRoute,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
+  AuthRoute: AuthRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
