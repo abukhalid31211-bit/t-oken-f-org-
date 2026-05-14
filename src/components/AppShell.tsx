@@ -143,7 +143,7 @@ export function AppShell() {
                   <ChevronDown className="size-3 text-muted-foreground hidden lg:block" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56" dir="rtl">
+              <DropdownMenuContent align="start" className="w-56">
                 <DropdownMenuLabel>
                   <div className="flex flex-col">
                     <span className="text-sm font-bold">أحمد العامودي</span>
