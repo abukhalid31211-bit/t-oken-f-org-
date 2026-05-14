@@ -22,6 +22,7 @@ import { Route as AppFactoryRouteImport } from './routes/_app.factory'
 import { Route as AppDistributionRouteImport } from './routes/_app.distribution'
 import { Route as AppAuditRouteImport } from './routes/_app.audit'
 import { Route as AppAssetsRouteImport } from './routes/_app.assets'
+import { Route as AppAssetsIdRouteImport } from './routes/_app.assets.$id'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -87,11 +88,16 @@ const AppAssetsRoute = AppAssetsRouteImport.update({
   path: '/assets',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAssetsIdRoute = AppAssetsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AppAssetsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/auth': typeof AuthRouteWithChildren
-  '/assets': typeof AppAssetsRoute
+  '/assets': typeof AppAssetsRouteWithChildren
   '/audit': typeof AppAuditRoute
   '/distribution': typeof AppDistributionRoute
   '/factory': typeof AppFactoryRoute
@@ -101,10 +107,11 @@ export interface FileRoutesByFullPath {
   '/auth/forgot': typeof AuthForgotRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
+  '/assets/$id': typeof AppAssetsIdRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRouteWithChildren
-  '/assets': typeof AppAssetsRoute
+  '/assets': typeof AppAssetsRouteWithChildren
   '/audit': typeof AppAuditRoute
   '/distribution': typeof AppDistributionRoute
   '/factory': typeof AppFactoryRoute
@@ -115,12 +122,13 @@ export interface FileRoutesByTo {
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
   '/': typeof AppIndexRoute
+  '/assets/$id': typeof AppAssetsIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
-  '/_app/assets': typeof AppAssetsRoute
+  '/_app/assets': typeof AppAssetsRouteWithChildren
   '/_app/audit': typeof AppAuditRoute
   '/_app/distribution': typeof AppDistributionRoute
   '/_app/factory': typeof AppFactoryRoute
@@ -131,6 +139,7 @@ export interface FileRoutesById {
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
   '/_app/': typeof AppIndexRoute
+  '/_app/assets/$id': typeof AppAssetsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -147,6 +156,7 @@ export interface FileRouteTypes {
     | '/auth/forgot'
     | '/auth/login'
     | '/auth/register'
+    | '/assets/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
@@ -161,6 +171,7 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/register'
     | '/'
+    | '/assets/$id'
   id:
     | '__root__'
     | '/_app'
@@ -176,6 +187,7 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/register'
     | '/_app/'
+    | '/_app/assets/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -276,11 +288,30 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAssetsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/assets/$id': {
+      id: '/_app/assets/$id'
+      path: '/$id'
+      fullPath: '/assets/$id'
+      preLoaderRoute: typeof AppAssetsIdRouteImport
+      parentRoute: typeof AppAssetsRoute
+    }
   }
 }
 
+interface AppAssetsRouteChildren {
+  AppAssetsIdRoute: typeof AppAssetsIdRoute
+}
+
+const AppAssetsRouteChildren: AppAssetsRouteChildren = {
+  AppAssetsIdRoute: AppAssetsIdRoute,
+}
+
+const AppAssetsRouteWithChildren = AppAssetsRoute._addFileChildren(
+  AppAssetsRouteChildren,
+)
+
 interface AppRouteChildren {
-  AppAssetsRoute: typeof AppAssetsRoute
+  AppAssetsRoute: typeof AppAssetsRouteWithChildren
   AppAuditRoute: typeof AppAuditRoute
   AppDistributionRoute: typeof AppDistributionRoute
   AppFactoryRoute: typeof AppFactoryRoute
@@ -291,7 +322,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
-  AppAssetsRoute: AppAssetsRoute,
+  AppAssetsRoute: AppAssetsRouteWithChildren,
   AppAuditRoute: AppAuditRoute,
   AppDistributionRoute: AppDistributionRoute,
   AppFactoryRoute: AppFactoryRoute,
