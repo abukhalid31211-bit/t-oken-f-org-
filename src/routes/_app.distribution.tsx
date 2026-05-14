@@ -3,5 +3,4 @@ import { Distribution } from "@/pages/Distribution";
 
 export const Route = createFileRoute("/_app/distribution")({
   component: Distribution,
-  head: () => ({ meta: [{ title: "نواة — التوزيع الجماعي" }] }),
 });
