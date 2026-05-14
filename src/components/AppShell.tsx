@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard, Factory, Wallet, Send, Coins, BarChart3, ShieldCheck,
   Settings, Plus, Bell, Search, Menu, LogOut, User, ChevronDown, CheckCircle2,
-  Network, Users, Sun, Moon,
+  Network, Users, Sun, Moon, X,
 } from "lucide-react";
 import {
   CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList,
@@ -11,9 +11,6 @@ import {
 import {
   Popover, PopoverContent, PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Sheet, SheetContent, SheetTrigger,
-} from "@/components/ui/sheet";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
   DropdownMenuSeparator, DropdownMenuTrigger,
@@ -66,6 +63,7 @@ export function AppShell() {
   const [cmdOpen, setCmdOpen] = useState(false);
   const [mobileNav, setMobileNav] = useState(false);
   const [dark, setDark] = useDarkMode();
+  const sidebarRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -73,10 +71,22 @@ export function AppShell() {
         e.preventDefault();
         setCmdOpen((o) => !o);
       }
+      if (e.key === "Escape") setMobileNav(false);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
+
+  useEffect(() => {
+    if (mobileNav) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [mobileNav]);
+
+  const closeMobileNav = () => setMobileNav(false);
 
   return (
     <div dir="rtl" className="min-h-screen bg-background text-foreground flex">
@@ -85,24 +95,50 @@ export function AppShell() {
         <SidebarBody pathname={pathname} />
       </aside>
 
-      {/* Mobile sidebar */}
-      <Sheet open={mobileNav} onOpenChange={setMobileNav}>
-        <SheetContent side="right" className="w-72 p-6 overflow-y-auto">
-          <SidebarBody pathname={pathname} onNavigate={() => setMobileNav(false)} />
-        </SheetContent>
-      </Sheet>
+      {/* Mobile sidebar overlay — pure CSS, no Radix Sheet */}
+      {mobileNav && (
+        <div
+          className="fixed inset-0 z-40 bg-black/60 lg:hidden"
+          onClick={closeMobileNav}
+          aria-hidden="true"
+        />
+      )}
+      <div
+        ref={sidebarRef}
+        className={`fixed top-0 right-0 z-50 h-full w-72 bg-background border-l border-border p-6 overflow-y-auto flex flex-col transition-transform duration-300 ease-in-out lg:hidden ${
+          mobileNav ? "translate-x-0" : "translate-x-full"
+        }`}
+        aria-modal="true"
+        role="dialog"
+      >
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="size-8 bg-accent rounded-sm" />
+            <span className="font-bold text-xl tracking-tight">نواة</span>
+          </div>
+          <button
+            onClick={closeMobileNav}
+            className="size-9 grid place-items-center rounded text-muted-foreground hover:text-foreground hover:bg-muted"
+          >
+            <X className="size-5" />
+          </button>
+        </div>
+        <SidebarBody pathname={pathname} onNavigate={closeMobileNav} hideLogo />
+      </div>
 
       <main className="flex-1 min-w-0">
         <header className="h-16 lg:h-20 border-b border-border flex items-center justify-between px-4 lg:px-10 bg-background/80 backdrop-blur-md sticky top-0 z-10 gap-3">
           <div className="flex items-center gap-3 lg:gap-6 min-w-0">
             <button
+              type="button"
               onClick={() => setMobileNav(true)}
-              className="lg:hidden size-9 grid place-items-center rounded text-muted-foreground hover:text-foreground hover:bg-muted"
+              className="lg:hidden size-10 grid place-items-center rounded text-muted-foreground hover:text-foreground hover:bg-muted active:bg-muted/80 transition-colors"
+              aria-label="فتح القائمة"
             >
               <Menu className="size-5" />
             </button>
             <div className="hidden sm:flex items-center gap-2 text-xs font-medium uppercase tracking-wider">
-              <span className="size-2 rounded-full bg-success animate-pulse-slow" />
+              <span className="size-2 rounded-full bg-success animate-pulse" />
               <span className="ltr font-mono">Ethereum Mainnet</span>
             </div>
             <div className="hidden md:block h-4 w-px bg-border" />
@@ -111,8 +147,9 @@ export function AppShell() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 lg:gap-4">
+          <div className="flex items-center gap-2 lg:gap-3">
             <button
+              type="button"
               onClick={() => setCmdOpen(true)}
               className="size-9 grid place-items-center rounded text-muted-foreground hover:text-foreground hover:bg-muted"
               aria-label="بحث"
@@ -121,6 +158,7 @@ export function AppShell() {
             </button>
 
             <button
+              type="button"
               onClick={() => setDark((d) => !d)}
               className="size-9 grid place-items-center rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
               aria-label={dark ? "الوضع الفاتح" : "الوضع الداكن"}
@@ -235,13 +273,17 @@ export function AppShell() {
   );
 }
 
-function SidebarBody({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {
+function SidebarBody({
+  pathname, onNavigate, hideLogo,
+}: { pathname: string; onNavigate?: () => void; hideLogo?: boolean }) {
   return (
     <>
-      <Link to="/" onClick={onNavigate} className="mb-10 flex items-center gap-3 shrink-0">
-        <div className="size-8 bg-accent rounded-sm" />
-        <span className="font-bold text-xl tracking-tight">نواة</span>
-      </Link>
+      {!hideLogo && (
+        <Link to="/" onClick={onNavigate} className="mb-10 flex items-center gap-3 shrink-0">
+          <div className="size-8 bg-accent rounded-sm" />
+          <span className="font-bold text-xl tracking-tight">نواة</span>
+        </Link>
+      )}
 
       <nav className="space-y-0.5 flex-1">
         {nav.map((item) => {
@@ -252,10 +294,10 @@ function SidebarBody({ pathname, onNavigate }: { pathname: string; onNavigate?: 
               key={item.to}
               to={item.to}
               onClick={onNavigate}
-              className={`flex items-center gap-3 py-2 px-3 rounded transition-colors ${
+              className={`flex items-center gap-3 py-2.5 px-3 rounded transition-colors ${
                 active
                   ? "bg-foreground/5 text-foreground font-semibold"
-                  : "text-muted-foreground hover:text-foreground"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
               }`}
             >
               <Icon className="size-4 shrink-0" strokeWidth={1.75} />
@@ -269,22 +311,23 @@ function SidebarBody({ pathname, onNavigate }: { pathname: string; onNavigate?: 
         <Link
           to="/settings"
           onClick={onNavigate}
-          className={`flex items-center gap-3 py-2 px-3 rounded transition-colors ${
+          className={`flex items-center gap-3 py-2.5 px-3 rounded transition-colors ${
             pathname === "/settings"
               ? "bg-foreground/5 text-foreground font-semibold"
-              : "text-muted-foreground hover:text-foreground"
+              : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
           }`}
         >
           <Settings className="size-4" strokeWidth={1.75} />
           <span className="text-sm">الإعدادات</span>
         </Link>
-        <button
-          onClick={() => { onNavigate?.(); setTimeout(() => { window.location.href = "/auth/login"; }, 50); }}
-          className="w-full flex items-center gap-3 py-2 px-3 rounded text-muted-foreground hover:text-destructive transition-colors"
+        <Link
+          to="/auth/login"
+          onClick={onNavigate}
+          className="w-full flex items-center gap-3 py-2.5 px-3 rounded text-muted-foreground hover:text-destructive hover:bg-muted/60 transition-colors"
         >
           <LogOut className="size-4" strokeWidth={1.75} />
           <span className="text-sm">تسجيل الخروج</span>
-        </button>
+        </Link>
       </div>
     </>
   );
