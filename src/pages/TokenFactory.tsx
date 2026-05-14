@@ -12,7 +12,7 @@ const features = [
   { id: "capped", label: "حد أقصى للمعروض", desc: "تحديد سقف صارم لإجمالي العرض" },
 ];
 
-type Step = "form" | "review" | "deploying" | "success";
+type Step = "review" | "deploying" | "success";
 
 export function TokenFactory() {
   const [active, setActive] = useState<Record<string, boolean>>({
@@ -45,7 +45,11 @@ export function TokenFactory() {
 
   const reset = () => {
     setOpen(false);
-    setTimeout(() => setStep("form"), 200);
+    setTimeout(() => {
+      setStep("review");
+      setForm({ name: "", symbol: "", decimals: "18", supply: "1000000", network: "Ethereum Mainnet", wallet: "محفظة الخزينة الأساسية" });
+      setActive({ mintable: true, burnable: true, pausable: false, capped: false });
+    }, 300);
   };
 
   return (
@@ -142,7 +146,7 @@ export function TokenFactory() {
         </aside>
       </div>
 
-      <Dialog open={open} onOpenChange={(o) => { if (step !== "deploying") setOpen(o); }}>
+      <Dialog open={open} onOpenChange={(o) => { if (step !== "deploying") { setOpen(o); if (!o) setTimeout(() => setStep("review"), 300); } }}>
         <DialogContent className="max-w-lg" dir="rtl">
           {step === "review" && (
             <>

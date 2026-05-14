@@ -16,8 +16,10 @@ import { Route as AuthRegisterRouteImport } from './routes/auth.register'
 import { Route as AuthLoginRouteImport } from './routes/auth.login'
 import { Route as AuthForgotRouteImport } from './routes/auth.forgot'
 import { Route as AppWalletsRouteImport } from './routes/_app.wallets'
+import { Route as AppUsersRouteImport } from './routes/_app.users'
 import { Route as AppSettingsRouteImport } from './routes/_app.settings'
 import { Route as AppReportsRouteImport } from './routes/_app.reports'
+import { Route as AppNetworksRouteImport } from './routes/_app.networks'
 import { Route as AppFactoryRouteImport } from './routes/_app.factory'
 import { Route as AppDistributionRouteImport } from './routes/_app.distribution'
 import { Route as AppAuditRouteImport } from './routes/_app.audit'
@@ -58,6 +60,11 @@ const AppWalletsRoute = AppWalletsRouteImport.update({
   path: '/wallets',
   getParentRoute: () => AppRoute,
 } as any)
+const AppUsersRoute = AppUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppSettingsRoute = AppSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -66,6 +73,11 @@ const AppSettingsRoute = AppSettingsRouteImport.update({
 const AppReportsRoute = AppReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppNetworksRoute = AppNetworksRouteImport.update({
+  id: '/networks',
+  path: '/networks',
   getParentRoute: () => AppRoute,
 } as any)
 const AppFactoryRoute = AppFactoryRouteImport.update({
@@ -101,8 +113,10 @@ export interface FileRoutesByFullPath {
   '/audit': typeof AppAuditRoute
   '/distribution': typeof AppDistributionRoute
   '/factory': typeof AppFactoryRoute
+  '/networks': typeof AppNetworksRoute
   '/reports': typeof AppReportsRoute
   '/settings': typeof AppSettingsRoute
+  '/users': typeof AppUsersRoute
   '/wallets': typeof AppWalletsRoute
   '/auth/forgot': typeof AuthForgotRoute
   '/auth/login': typeof AuthLoginRoute
@@ -115,8 +129,10 @@ export interface FileRoutesByTo {
   '/audit': typeof AppAuditRoute
   '/distribution': typeof AppDistributionRoute
   '/factory': typeof AppFactoryRoute
+  '/networks': typeof AppNetworksRoute
   '/reports': typeof AppReportsRoute
   '/settings': typeof AppSettingsRoute
+  '/users': typeof AppUsersRoute
   '/wallets': typeof AppWalletsRoute
   '/auth/forgot': typeof AuthForgotRoute
   '/auth/login': typeof AuthLoginRoute
@@ -132,8 +148,10 @@ export interface FileRoutesById {
   '/_app/audit': typeof AppAuditRoute
   '/_app/distribution': typeof AppDistributionRoute
   '/_app/factory': typeof AppFactoryRoute
+  '/_app/networks': typeof AppNetworksRoute
   '/_app/reports': typeof AppReportsRoute
   '/_app/settings': typeof AppSettingsRoute
+  '/_app/users': typeof AppUsersRoute
   '/_app/wallets': typeof AppWalletsRoute
   '/auth/forgot': typeof AuthForgotRoute
   '/auth/login': typeof AuthLoginRoute
@@ -150,8 +168,10 @@ export interface FileRouteTypes {
     | '/audit'
     | '/distribution'
     | '/factory'
+    | '/networks'
     | '/reports'
     | '/settings'
+    | '/users'
     | '/wallets'
     | '/auth/forgot'
     | '/auth/login'
@@ -164,8 +184,10 @@ export interface FileRouteTypes {
     | '/audit'
     | '/distribution'
     | '/factory'
+    | '/networks'
     | '/reports'
     | '/settings'
+    | '/users'
     | '/wallets'
     | '/auth/forgot'
     | '/auth/login'
@@ -180,8 +202,10 @@ export interface FileRouteTypes {
     | '/_app/audit'
     | '/_app/distribution'
     | '/_app/factory'
+    | '/_app/networks'
     | '/_app/reports'
     | '/_app/settings'
+    | '/_app/users'
     | '/_app/wallets'
     | '/auth/forgot'
     | '/auth/login'
@@ -246,6 +270,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppWalletsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/users': {
+      id: '/_app/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof AppUsersRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/settings': {
       id: '/_app/settings'
       path: '/settings'
@@ -258,6 +289,13 @@ declare module '@tanstack/react-router' {
       path: '/reports'
       fullPath: '/reports'
       preLoaderRoute: typeof AppReportsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/networks': {
+      id: '/_app/networks'
+      path: '/networks'
+      fullPath: '/networks'
+      preLoaderRoute: typeof AppNetworksRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/factory': {
@@ -315,8 +353,10 @@ interface AppRouteChildren {
   AppAuditRoute: typeof AppAuditRoute
   AppDistributionRoute: typeof AppDistributionRoute
   AppFactoryRoute: typeof AppFactoryRoute
+  AppNetworksRoute: typeof AppNetworksRoute
   AppReportsRoute: typeof AppReportsRoute
   AppSettingsRoute: typeof AppSettingsRoute
+  AppUsersRoute: typeof AppUsersRoute
   AppWalletsRoute: typeof AppWalletsRoute
   AppIndexRoute: typeof AppIndexRoute
 }
@@ -326,8 +366,10 @@ const AppRouteChildren: AppRouteChildren = {
   AppAuditRoute: AppAuditRoute,
   AppDistributionRoute: AppDistributionRoute,
   AppFactoryRoute: AppFactoryRoute,
+  AppNetworksRoute: AppNetworksRoute,
   AppReportsRoute: AppReportsRoute,
   AppSettingsRoute: AppSettingsRoute,
+  AppUsersRoute: AppUsersRoute,
   AppWalletsRoute: AppWalletsRoute,
   AppIndexRoute: AppIndexRoute,
 }

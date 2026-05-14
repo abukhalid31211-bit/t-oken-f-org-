@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Link, Outlet, useRouterState } from "@tanstack/react-router";
+import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard, Factory, Wallet, Send, Coins, BarChart3, ShieldCheck,
-  Settings, Plus, Bell, Search, Menu, X, LogOut, User, ChevronDown, CheckCircle2,
+  Settings, Plus, Bell, Search, Menu, LogOut, User, ChevronDown, CheckCircle2,
+  Network, Users, Sun, Moon,
 } from "lucide-react";
 import {
   CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList,
@@ -25,7 +26,9 @@ const nav = [
   { to: "/wallets", label: "المحافظ", icon: Wallet },
   { to: "/distribution", label: "التوزيع الجماعي", icon: Send },
   { to: "/assets", label: "سجل الأصول", icon: Coins },
+  { to: "/networks", label: "إعدادات الشبكات", icon: Network },
   { to: "/reports", label: "التقارير", icon: BarChart3 },
+  { to: "/users", label: "المستخدمون", icon: Users },
   { to: "/audit", label: "سجلات التدقيق", icon: ShieldCheck },
 ] as const;
 
@@ -35,10 +38,34 @@ const notifications = [
   { title: "تحذير: محاولة دخول غير معتادة", body: "IP 203.0.113.55", time: "منذ 3 ساعات", unread: false },
 ];
 
+function useDarkMode() {
+  const [dark, setDark] = useState(() => {
+    if (typeof window === "undefined") return false;
+    const saved = localStorage.getItem("theme");
+    if (saved) return saved === "dark";
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  });
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (dark) {
+      root.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      root.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
+  }, [dark]);
+
+  return [dark, setDark] as const;
+}
+
 export function AppShell() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const navigate = useNavigate();
   const [cmdOpen, setCmdOpen] = useState(false);
   const [mobileNav, setMobileNav] = useState(false);
+  const [dark, setDark] = useDarkMode();
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -54,13 +81,13 @@ export function AppShell() {
   return (
     <div dir="rtl" className="min-h-screen bg-background text-foreground flex">
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex w-64 border-l border-border flex-col p-6 sticky top-0 h-screen shrink-0">
+      <aside className="hidden lg:flex w-64 border-l border-border flex-col p-6 sticky top-0 h-screen shrink-0 overflow-y-auto">
         <SidebarBody pathname={pathname} />
       </aside>
 
       {/* Mobile sidebar */}
       <Sheet open={mobileNav} onOpenChange={setMobileNav}>
-        <SheetContent side="right" className="w-72 p-6">
+        <SheetContent side="right" className="w-72 p-6 overflow-y-auto">
           <SidebarBody pathname={pathname} onNavigate={() => setMobileNav(false)} />
         </SheetContent>
       </Sheet>
@@ -91,6 +118,14 @@ export function AppShell() {
               aria-label="بحث"
             >
               <Search className="size-4" strokeWidth={1.75} />
+            </button>
+
+            <button
+              onClick={() => setDark((d) => !d)}
+              className="size-9 grid place-items-center rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              aria-label={dark ? "الوضع الفاتح" : "الوضع الداكن"}
+            >
+              {dark ? <Sun className="size-4" strokeWidth={1.75} /> : <Moon className="size-4" strokeWidth={1.75} />}
             </button>
 
             <Popover>
@@ -177,17 +212,17 @@ export function AppShell() {
           <CommandEmpty>لا توجد نتائج.</CommandEmpty>
           <CommandGroup heading="الصفحات">
             {nav.map((n) => (
-              <CommandItem key={n.to} onSelect={() => { setCmdOpen(false); window.location.href = n.to; }}>
+              <CommandItem key={n.to} onSelect={() => { setCmdOpen(false); navigate({ to: n.to }); }}>
                 <n.icon className="size-4 ml-2" />
                 {n.label}
               </CommandItem>
             ))}
           </CommandGroup>
           <CommandGroup heading="إجراءات سريعة">
-            <CommandItem onSelect={() => { setCmdOpen(false); window.location.href = "/factory"; }}>
+            <CommandItem onSelect={() => { setCmdOpen(false); navigate({ to: "/factory" }); }}>
               <Plus className="size-4 ml-2" /> إنشاء توكن جديد
             </CommandItem>
-            <CommandItem onSelect={() => { setCmdOpen(false); window.location.href = "/distribution/single"; }}>
+            <CommandItem onSelect={() => { setCmdOpen(false); navigate({ to: "/distribution" }); }}>
               <Send className="size-4 ml-2" /> تحويل فردي
             </CommandItem>
             <CommandItem onSelect={() => { setCmdOpen(false); toast.success("تم تأكيد التحقق", { icon: <CheckCircle2 className="size-4" /> }); }}>
@@ -203,12 +238,12 @@ export function AppShell() {
 function SidebarBody({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {
   return (
     <>
-      <Link to="/" onClick={onNavigate} className="mb-12 flex items-center gap-3">
+      <Link to="/" onClick={onNavigate} className="mb-10 flex items-center gap-3 shrink-0">
         <div className="size-8 bg-accent rounded-sm" />
         <span className="font-bold text-xl tracking-tight">نواة</span>
       </Link>
 
-      <nav className="space-y-1">
+      <nav className="space-y-0.5 flex-1">
         {nav.map((item) => {
           const active = pathname === item.to || (item.to !== "/" && pathname.startsWith(item.to));
           const Icon = item.icon;
@@ -230,7 +265,7 @@ function SidebarBody({ pathname, onNavigate }: { pathname: string; onNavigate?: 
         })}
       </nav>
 
-      <div className="mt-auto pt-6">
+      <div className="mt-6 pt-6 border-t border-border">
         <Link
           to="/settings"
           onClick={onNavigate}
