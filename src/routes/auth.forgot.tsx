@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/auth/forgot")({
   component: ForgotPage,
-  head: () => ({ meta: [{ title: "نواة — استعادة كلمة المرور" }] }),
+  head: () => ({ meta: [{ title: "AkramX — استعادة كلمة المرور" }] }),
 });
 
 function ForgotPage() {

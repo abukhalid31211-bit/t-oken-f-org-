@@ -3,5 +3,5 @@ import { Users } from "@/pages/Users";
 
 export const Route = createFileRoute("/_app/users")({
   component: Users,
-  head: () => ({ meta: [{ title: "نواة — إدارة المستخدمين" }] }),
+  head: () => ({ meta: [{ title: "AkramX — إدارة المستخدمين" }] }),
 });

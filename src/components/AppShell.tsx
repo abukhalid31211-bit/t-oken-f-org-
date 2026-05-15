@@ -118,8 +118,13 @@ export function AppShell() {
       >
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="size-8 bg-accent rounded-sm" />
-            <span className="font-bold text-xl tracking-tight">نواة</span>
+            <div className="size-8 bg-foreground text-background rounded-sm grid place-items-center shrink-0">
+              <span className="text-[11px] font-black tracking-tighter ltr leading-none">AX</span>
+            </div>
+            <div className="flex flex-col leading-none gap-1">
+              <span className="font-bold text-sm tracking-tight ltr">AkramX</span>
+              <span className="text-[9px] text-muted-foreground font-semibold tracking-widest uppercase ltr">Web3 Solutions</span>
+            </div>
           </div>
           <button
             type="button"
@@ -363,8 +368,13 @@ function SidebarBody({ pathname, onNavigate, hideLogo }: {
     <>
       {!hideLogo && (
         <Link to="/" onClick={onNavigate} className="mb-10 flex items-center gap-3 shrink-0">
-          <div className="size-8 bg-accent rounded-sm" />
-          <span className="font-bold text-xl tracking-tight">نواة</span>
+          <div className="size-8 bg-foreground text-background rounded-sm grid place-items-center shrink-0">
+            <span className="text-[11px] font-black tracking-tighter ltr leading-none">AX</span>
+          </div>
+          <div className="flex flex-col leading-none gap-1">
+            <span className="font-bold text-sm tracking-tight ltr">AkramX</span>
+            <span className="text-[9px] text-muted-foreground font-semibold tracking-widest uppercase ltr">Web3 Solutions</span>
+          </div>
         </Link>
       )}
       <nav className="space-y-0.5 flex-1">

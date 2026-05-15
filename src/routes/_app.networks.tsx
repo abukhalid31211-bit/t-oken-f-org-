@@ -3,5 +3,5 @@ import { Networks } from "@/pages/Networks";
 
 export const Route = createFileRoute("/_app/networks")({
   component: Networks,
-  head: () => ({ meta: [{ title: "نواة — إعدادات الشبكات" }] }),
+  head: () => ({ meta: [{ title: "AkramX — إعدادات الشبكات" }] }),
 });

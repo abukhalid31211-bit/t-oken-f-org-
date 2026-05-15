@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/assets/$id")({
   component: AssetDetail,
-  head: ({ params }) => ({ meta: [{ title: `نواة — ${params.id}` }] }),
+  head: ({ params }) => ({ meta: [{ title: `AkramX — ${params.id}` }] }),
 });
 
 const dataMap: Record<string, any> = {

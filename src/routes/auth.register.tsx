@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/auth/register")({
   component: RegisterPage,
-  head: () => ({ meta: [{ title: "نواة — إنشاء حساب مؤسسة" }] }),
+  head: () => ({ meta: [{ title: "AkramX — إنشاء حساب مؤسسة" }] }),
 });
 
 function RegisterPage() {

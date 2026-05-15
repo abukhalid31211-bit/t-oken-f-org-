@@ -3,5 +3,5 @@ import { Audit } from "@/pages/Audit";
 
 export const Route = createFileRoute("/_app/audit")({
   component: Audit,
-  head: () => ({ meta: [{ title: "نواة — سجلات التدقيق" }] }),
+  head: () => ({ meta: [{ title: "AkramX — سجلات التدقيق" }] }),
 });

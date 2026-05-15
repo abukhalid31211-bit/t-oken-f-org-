@@ -3,5 +3,5 @@ import { Wallets } from "@/pages/Wallets";
 
 export const Route = createFileRoute("/_app/wallets")({
   component: Wallets,
-  head: () => ({ meta: [{ title: "نواة — المحافظ" }] }),
+  head: () => ({ meta: [{ title: "AkramX — المحافظ" }] }),
 });

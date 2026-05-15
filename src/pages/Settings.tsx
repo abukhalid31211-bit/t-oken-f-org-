@@ -122,11 +122,11 @@ function Company() {
       >
         <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
           <Field label="اسم الشركة" value="مؤسسة الابتكار الرقمي" />
-          <Field label="الاسم التجاري" value="نواة" />
-          <Field label="البريد الإلكتروني" value="admin@nawah.io" mono />
+          <Field label="الاسم التجاري" value="AkramX Web3 Solutions" />
+          <Field label="البريد الإلكتروني" value="admin@akramx.io" mono />
           <Field label="الهاتف" value="+966 11 4xx xxxx" mono />
           <Field label="السجل التجاري" value="1010123456" mono />
-          <Field label="الموقع الإلكتروني" value="https://nawah.io" mono />
+          <Field label="الموقع الإلكتروني" value="https://akramx.io" mono />
         </div>
       </Section>
 
